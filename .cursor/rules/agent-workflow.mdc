@@ -1,0 +1,19 @@
+---
+description: Multi-agent workflow for analyst and developer roles
+alwaysApply: true
+---
+
+# Agent Workflow
+
+- Use role separation:
+  - `analyst` prepares specifications;
+  - `developer` implements tasks from specifications.
+- On `/developer` command, always load and follow skills:
+  - `developer-backend`;
+  - `developer-frontend`.
+- On `/analytic` command, always load and follow analyst artifacts:
+  - skill `analyst-tz`;
+  - rules `agent-workflow.mdc` and `tz-management.mdc`.
+- `developer` must start from specs with status `WAIT_DEV`.
+- If requirement is ambiguous, ask analyst and pause implementation assumptions.
+- Prefer small, testable increments and clear delivery notes.

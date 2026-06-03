@@ -1,0 +1,13 @@
+---
+description: Rules for ТЗ file naming and status tracking
+globs: ТЗ/**/*.md
+alwaysApply: false
+---
+
+# ТЗ Management
+
+- All new specifications are created in `ТЗ/` folder.
+- New specification status is always `WAIT_DEV`.
+- Status must be included in file name: `YYYY-MM-DD__STATUS__task-name.md`.
+- Keep `ТЗ/REGISTRY.md` synchronized with any specification changes.
+- Suggested status flow: `WAIT_DEV -> IN_DEV -> ON_REVIEW -> DONE`.

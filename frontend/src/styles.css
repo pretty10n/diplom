@@ -1,0 +1,137 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f6f8fb;
+  color: #202532;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.steps button.active {
+  background: #1f65ff;
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.grid .common-grid-span {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+input,
+select,
+button {
+  border: 1px solid #d3d8e3;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.lookup-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lookup-row input {
+  width: 420px;
+  max-width: 100%;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.totals-card {
+  border: 1px solid #e3e7ef;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fbfcff;
+}
+
+.totals-card h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  border: 1px solid #e3e7ef;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ok {
+  color: #0d8f47;
+}
+
+.error {
+  color: #c0261a;
+}
+
+.hint {
+  font-size: 13px;
+  color: #5a6378;
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
