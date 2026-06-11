@@ -1,0 +1,94 @@
+@startuml fig_2_3_er_model
+!pragma layout smetana
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam ArrowColor #333333
+skinparam entity {
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #E8E8E8
+  BorderColor #333333
+  FontSize 10
+}
+
+entity "document_common_info" as common {
+  PK/FK  document_id
+  --
+  tru_name, tru_code
+  stage, report_year, plan_year
+}
+
+entity "document" as document {
+  PK  id (uuid)
+  --
+  status
+  created_at, updated_at
+}
+
+entity "dictionary_section_key" as section {
+  PK  key
+  --
+  label, form_no
+  section_no, version
+  active
+}
+
+entity "reference_material" as material {
+  PK  id (uuid)
+  --
+  name
+  okpd_code, ekps_code
+  fnn
+  UQ  lower(name)
+}
+
+entity "document_entry" as entry {
+  PK  id (uuid)
+  FK  document_id
+  FK  section_key
+  --
+  row_no
+  fields (jsonb)
+  computed (jsonb)
+  validation_status
+}
+
+entity "dictionary_value" as dvalue {
+  PK  id (bigserial)
+  --
+  dictionary_type
+  code, label
+  version, active
+  UQ  (type, code, version)
+}
+
+entity "reference_supplier" as supplier {
+  PK  id (uuid)
+  --
+  name, inn
+  UQ  inn / lower(name)
+}
+
+entity "document_totals_snapshot" as totals {
+  PK  id (uuid)
+  FK  document_id
+  --
+  totals (jsonb)
+  created_at
+}
+
+common -[hidden]down- document
+document -[hidden]right- entry
+entry -[hidden]down- totals
+common -[hidden]right- section
+section -[hidden]down- dvalue
+section -[hidden]right- material
+dvalue -[hidden]right- supplier
+
+document ||--|| common : "1 : 1"
+document ||--o{ entry : "1 : N"
+document ||--o{ totals : "1 : N"
+section ||--o{ entry : "1 : N"
+
+@enduml

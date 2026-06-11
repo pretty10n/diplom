@@ -4,6 +4,9 @@ import type {
   StoredDocumentCommonInfo,
   ExportResponse,
   ListEntriesResponse,
+  ReferenceMaterial,
+  ReferenceSearchResponse,
+  ReferenceSupplier,
   TotalsResponse,
   UpsertEntryRequest
 } from "../types/api";
@@ -120,6 +123,68 @@ export async function deleteEntry(documentId: string, entryId: string): Promise<
 
 export async function getTotals(documentId: string): Promise<TotalsResponse> {
   return request(`/documents/${documentId}/totals`);
+}
+
+export async function searchSuppliers(query: string, limit = 10): Promise<ReferenceSearchResponse<ReferenceSupplier>> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  return request<ReferenceSearchResponse<ReferenceSupplier>>(`/reference-data/suppliers/search?${params}`);
+}
+
+export async function listSuppliers(): Promise<ReferenceSearchResponse<ReferenceSupplier>> {
+  return request<ReferenceSearchResponse<ReferenceSupplier>>("/reference-data/suppliers");
+}
+
+export async function createSupplier(payload: { name: string; inn?: string }): Promise<ReferenceSupplier> {
+  return request<ReferenceSupplier>("/reference-data/suppliers", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function updateSupplier(id: string, payload: { name: string; inn?: string }): Promise<ReferenceSupplier> {
+  return request<ReferenceSupplier>(`/reference-data/suppliers/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteSupplier(id: string): Promise<void> {
+  await request<void>(`/reference-data/suppliers/${id}`, { method: "DELETE" });
+}
+
+export async function searchMaterials(query: string, limit = 10): Promise<ReferenceSearchResponse<ReferenceMaterial>> {
+  const params = new URLSearchParams({ q: query, limit: String(limit) });
+  return request<ReferenceSearchResponse<ReferenceMaterial>>(`/reference-data/materials/search?${params}`);
+}
+
+export async function listMaterials(): Promise<ReferenceSearchResponse<ReferenceMaterial>> {
+  return request<ReferenceSearchResponse<ReferenceMaterial>>("/reference-data/materials");
+}
+
+export async function createMaterial(payload: {
+  name: string;
+  okpdCode?: string;
+  ekpsCode?: string;
+  fnn?: string;
+}): Promise<ReferenceMaterial> {
+  return request<ReferenceMaterial>("/reference-data/materials", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function updateMaterial(
+  id: string,
+  payload: { name: string; okpdCode?: string; ekpsCode?: string; fnn?: string }
+): Promise<ReferenceMaterial> {
+  return request<ReferenceMaterial>(`/reference-data/materials/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteMaterial(id: string): Promise<void> {
+  await request<void>(`/reference-data/materials/${id}`, { method: "DELETE" });
 }
 
 export async function exportDocument(documentId: string, fileName: string): Promise<Blob> {

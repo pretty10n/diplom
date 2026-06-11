@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   addEntry,
   createDocument,
@@ -8,15 +8,21 @@ import {
   getDictionaries,
   getTotals,
   listEntries,
+  searchMaterials,
+  searchSuppliers,
   updateCommon,
   updateEntry
 } from "./api/client";
+import { AutocompleteInput } from "./components/AutocompleteInput";
+import { ReferenceDataManager } from "./components/ReferenceDataManager";
 import type {
   CommonInfoApiPayload,
   CommonInfoForm,
   DictionariesResponse,
   EntryFields,
   EntryItem,
+  ReferenceMaterial,
+  ReferenceSupplier,
   StoredDocumentCommonInfo,
   TotalsResponse
 } from "./types/api";
@@ -76,6 +82,17 @@ function App() {
   const [totals, setTotals] = useState<TotalsResponse | null>(null);
   const [exporting, setExporting] = useState(false);
   const [previewReadyForExport, setPreviewReadyForExport] = useState(false);
+  const [referenceDataOpen, setReferenceDataOpen] = useState(false);
+
+  const searchSupplierSuggestions = useCallback(async (query: string) => {
+    const response = await searchSuppliers(query);
+    return response.items;
+  }, []);
+
+  const searchMaterialSuggestions = useCallback(async (query: string) => {
+    const response = await searchMaterials(query);
+    return response.items;
+  }, []);
 
   const visibleSectionKeys = useMemo(
     () => dictionaries?.sectionKeys.filter((s) => !excludedSectionKeys.has(s.key)) ?? [],
@@ -380,9 +397,16 @@ function App() {
         </section>
       )}
 
+      {referenceDataOpen && <ReferenceDataManager onClose={() => setReferenceDataOpen(false)} />}
+
       {step === 2 && (
         <section className="card">
-          <h2>Универсальная строка</h2>
+          <div className="section-header">
+            <h2>Универсальная строка</h2>
+            <button type="button" onClick={() => setReferenceDataOpen(true)}>
+              Справочники
+            </button>
+          </div>
           <p className="hint">
             Данные в Excel берутся с сервера: после ввода нажмите «Добавить строку» или «Сохранить изменения». Пока строка не
             сохранена, она не попадает в выгрузку.
@@ -416,38 +440,123 @@ function App() {
               </div>
 
               <div className="grid">
-                {editableColumns.map((column) => (
-                  <label key={column}>
-                    {columnLabels[column] ?? column}
-                    {column === "col13_2" ? (
-                      <select
-                        value={String(entryFields[column] ?? "")}
-                        onChange={(e) => {
-                          setEntryFields((prev) => ({ ...prev, [column]: e.target.value }));
+                {editableColumns.map((column) => {
+                  if (column === "col2") {
+                    return (
+                      <AutocompleteInput<ReferenceMaterial>
+                        key={column}
+                        label={columnLabels[column] ?? column}
+                        value={String(entryFields.col2 ?? "")}
+                        onChange={(value) => {
+                          setEntryFields((prev) => ({ ...prev, col2: value }));
                           setDirty(true);
                         }}
-                      >
-                        <option value="">Выберите значение</option>
-                        {col13_2Options.map((value) => (
-                          <option key={value} value={value}>
-                            {value}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        value={String(entryFields[column] ?? "")}
-                        onChange={(e) => {
-                          const value = numericColumns.has(column)
-                            ? sanitizeDecimalInput(e.target.value, twoDecimalColumns.has(column) ? 2 : undefined)
-                            : e.target.value;
-                          setEntryFields((prev) => ({ ...prev, [column]: value }));
+                        onSelect={(item) => {
+                          setEntryFields((prev) => ({
+                            ...prev,
+                            col2: item.name,
+                            col3: item.okpdCode ?? prev.col3,
+                            col4: item.ekpsCode ?? prev.col4,
+                            col5: item.fnn ?? prev.col5
+                          }));
                           setDirty(true);
                         }}
+                        search={searchMaterialSuggestions}
+                        getKey={(item) => item.id}
+                        getLabel={(item) => item.name}
+                        getHint={(item) =>
+                          [item.okpdCode, item.ekpsCode, item.fnn].filter(Boolean).join(" · ") || "без кодов"
+                        }
                       />
-                    )}
-                  </label>
-                ))}
+                    );
+                  }
+
+                  if (column === "col14") {
+                    return (
+                      <AutocompleteInput<ReferenceSupplier>
+                        key={column}
+                        label={columnLabels[column] ?? column}
+                        value={String(entryFields.col14 ?? "")}
+                        onChange={(value) => {
+                          setEntryFields((prev) => ({ ...prev, col14: value }));
+                          setDirty(true);
+                        }}
+                        onSelect={(item) => {
+                          setEntryFields((prev) => ({
+                            ...prev,
+                            col14: item.name,
+                            col15: item.inn ?? prev.col15
+                          }));
+                          setDirty(true);
+                        }}
+                        search={searchSupplierSuggestions}
+                        getKey={(item) => item.id}
+                        getLabel={(item) => item.name}
+                        getHint={(item) => (item.inn ? `ИНН ${item.inn}` : "без ИНН")}
+                      />
+                    );
+                  }
+
+                  if (column === "col15") {
+                    return (
+                      <AutocompleteInput<ReferenceSupplier>
+                        key={column}
+                        label={columnLabels[column] ?? column}
+                        value={String(entryFields.col15 ?? "")}
+                        onChange={(value) => {
+                          setEntryFields((prev) => ({ ...prev, col15: value }));
+                          setDirty(true);
+                        }}
+                        onSelect={(item) => {
+                          setEntryFields((prev) => ({
+                            ...prev,
+                            col14: item.name,
+                            col15: item.inn ?? ""
+                          }));
+                          setDirty(true);
+                        }}
+                        search={searchSupplierSuggestions}
+                        getKey={(item) => item.id}
+                        getLabel={(item) => item.inn ?? item.name}
+                        getHint={(item) => item.name}
+                        minChars={3}
+                      />
+                    );
+                  }
+
+                  return (
+                    <label key={column}>
+                      {columnLabels[column] ?? column}
+                      {column === "col13_2" ? (
+                        <select
+                          value={String(entryFields[column] ?? "")}
+                          onChange={(e) => {
+                            setEntryFields((prev) => ({ ...prev, [column]: e.target.value }));
+                            setDirty(true);
+                          }}
+                        >
+                          <option value="">Выберите значение</option>
+                          {col13_2Options.map((value) => (
+                            <option key={value} value={value}>
+                              {value}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          value={String(entryFields[column] ?? "")}
+                          onChange={(e) => {
+                            const value = numericColumns.has(column)
+                              ? sanitizeDecimalInput(e.target.value, twoDecimalColumns.has(column) ? 2 : undefined)
+                              : e.target.value;
+                            setEntryFields((prev) => ({ ...prev, [column]: value }));
+                            setDirty(true);
+                          }}
+                        />
+                      )}
+                    </label>
+                  );
+                })}
                 <label>
                   {columnLabels.col11} (readonly)
                   <input value={col11Preview} readOnly />

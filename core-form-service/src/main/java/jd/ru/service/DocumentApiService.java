@@ -47,6 +47,7 @@ public class DocumentApiService {
     private final DictionaryValueRepository dictionaryValueRepository;
     private final EntryRowNumberService entryRowNumberService;
     private final XlsxTemplateExportService xlsxTemplateExportService;
+    private final ReferenceDataService referenceDataService;
     private final ObjectMapper objectMapper;
 
     public DocumentApiService(DocumentRepository documentRepository,
@@ -56,6 +57,7 @@ public class DocumentApiService {
                               DictionaryValueRepository dictionaryValueRepository,
                               EntryRowNumberService entryRowNumberService,
                               XlsxTemplateExportService xlsxTemplateExportService,
+                              ReferenceDataService referenceDataService,
                               ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.commonInfoRepository = commonInfoRepository;
@@ -64,6 +66,7 @@ public class DocumentApiService {
         this.dictionaryValueRepository = dictionaryValueRepository;
         this.entryRowNumberService = entryRowNumberService;
         this.xlsxTemplateExportService = xlsxTemplateExportService;
+        this.referenceDataService = referenceDataService;
         this.objectMapper = objectMapper;
     }
 
@@ -130,6 +133,7 @@ public class DocumentApiService {
         entry.setComputed(compute(section, request.fields()));
         entry.setValidationStatus(ValidationStatus.VALID);
         entryRepository.save(entry);
+        referenceDataService.syncFromEntryFields(request.fields());
 
         return toUpsertResponse(entry);
     }
@@ -152,6 +156,7 @@ public class DocumentApiService {
         entry.setComputed(compute(entry.getSection(), request.fields()));
         entry.setValidationStatus(ValidationStatus.VALID);
         entryRepository.save(entry);
+        referenceDataService.syncFromEntryFields(request.fields());
         return toUpsertResponse(entry);
     }
 

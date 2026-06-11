@@ -85,3 +85,21 @@ export type ExportResponse = {
     updatedSheets: string[];
   };
 };
+
+export type ReferenceSupplier = {
+  id: string;
+  name: string;
+  inn: string | null;
+};
+
+export type ReferenceMaterial = {
+  id: string;
+  name: string;
+  okpdCode: string | null;
+  ekpsCode: string | null;
+  fnn: string | null;
+};
+
+export type ReferenceSearchResponse<T> = {
+  items: T[];
+};

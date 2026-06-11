@@ -1,0 +1,67 @@
+@startuml bp01-activity-fill-forms
+!pragma useVerticalIf on
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam activityBackgroundColor #E8F4FD
+skinparam activityBorderColor #333333
+skinparam activityDiamondBackgroundColor #FFF9E6
+skinparam activityDiamondBorderColor #333333
+skinparam activityStartColor #333333
+skinparam activityEndColor #333333
+
+title BP-01: диаграмма деятельности заполнения форм 4/5/6
+
+start
+
+:Открыть мастер ввода;
+
+:Шаг 1: заполнить общий блок
+(ТРУ, этап, годы);
+
+:Сохранить черновик
+(POST/PATCH /documents);
+
+repeat
+
+  :Выбрать раздел из справочника;
+
+  :Определить formNo
+  по sectionKey (4/5/6);
+
+  :Заполнить поля строки
+  (col2..col15);
+
+  if (Данные валидны?) then (да)
+    :Рассчитать col11/col12
+    и сохранить строку;
+  else (нет)
+    :Показать ошибку;
+    backward :Заполнить поля строки;
+  endif
+
+repeat while (Ещё строки?) is (да)
+-> нет;
+
+:Шаг 3: предпросмотр
+(GET /entries, /totals);
+
+if (Нет invalid
+и агрегаты корректны?) then (да)
+else (нет)
+  backward :Выбрать раздел
+  из справочника;
+endif
+
+:Экспорт XLSX
+(POST /export, fill_template);
+
+if (entries > 0?) then (да)
+  :Скачать .xlsx;
+else (нет)
+  :VALIDATION_ERROR:
+  «Нет строк для экспорта»;
+endif
+
+stop
+
+@enduml
